@@ -1,19 +1,23 @@
+@import '../../styles/variables.scss';
+@import '../../styles/mixins.scss';
+
 .homePage {
-  display: flex;
-  justify-content: center;
+  @include flex-center;
   width: 100%;
   min-height: 100vh;
-  padding: 20px;
-  background-color: #f8f9fa;
+  padding: $spacing-lg;
+  background-color: $color-gray-light;
 }
 
 .container {
   width: 100%;
+  max-width: 800px;
+  @include flex-column;
 }
 
 .title {
+  @include heading-large;
   text-align: center;
-  margin-bottom: 30px;
-  color: #333;
-  font-size: 2rem;
+  margin-bottom: $spacing-xl;
+  color: $color-red-primary;
 } 
