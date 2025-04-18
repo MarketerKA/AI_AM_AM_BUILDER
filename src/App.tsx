@@ -1,12 +1,10 @@
-import { TodoList } from './components/TodoList'
+import { Home } from './pages'
 import styles from './App.module.scss'
-
 
 function App() {
   return (
     <div className={styles.app}>
-      <h1>Todo App</h1>
-      <TodoList />
+      <Home />
     </div>
   )
 }
