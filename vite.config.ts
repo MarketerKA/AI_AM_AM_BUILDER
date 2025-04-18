@@ -5,6 +5,7 @@ import path from 'path'
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
+  base: '/AI_AM_AM_BUILDER/', // Базовый путь для GitHub Pages
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
