@@ -29,7 +29,7 @@ export const ChatInterface = ({ chatName = 'МТС Ассистент' }: ChatIn
       
       // Добавляем ответ системы
       setTimeout(() => {
-        setMessages(prev => [...prev, { text: 'Ты отправил сообщение!', isUser: false }]);
+        setMessages(prev => [...prev, { text: 'Иди нахуй!', isUser: false }]);
       }, 500);
       
       setInputValue('');
