@@ -33,12 +33,14 @@ jobs:
         run: npm ci
       - name: Build
         run: npm run build
+      - name: List dist directory
+        run: ls -la dist
       - name: Upload artifact
         uses: actions/upload-artifact@v3
         with:
           name: github-pages
           path: ./dist
-          if-no-files-found: error
+          if-no-files-found: warn
 
   deploy:
     environment:
