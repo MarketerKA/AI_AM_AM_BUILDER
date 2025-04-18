@@ -7,9 +7,10 @@ on:
 
 # Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
+  actions: write
 
 # Allow only one concurrent deployment
 concurrency:
@@ -31,6 +32,8 @@ jobs:
         uses: actions/configure-pages@v4
         with:
           enablement: true
+          # Если у вас есть PAT с правами администратора репозитория, закомментируйте строку ниже и создайте секрет PAGES_TOKEN
+          token: ${{ secrets.PAGES_TOKEN }}
       - name: Install dependencies
         run: npm ci
       - name: Build
