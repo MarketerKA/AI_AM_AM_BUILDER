@@ -33,7 +33,7 @@ jobs:
         with:
           enablement: true
           # Если у вас есть PAT с правами администратора репозитория, закомментируйте строку ниже и создайте секрет PAGES_TOKEN
-          token: ${{ secrets.PAGES_TOKEN }}
+          # token: ${{ secrets.PAGES_TOKEN }}
       - name: Install dependencies
         run: npm ci
       - name: Build
