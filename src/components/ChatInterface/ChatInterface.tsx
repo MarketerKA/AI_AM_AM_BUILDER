@@ -1,7 +1,11 @@
 import { useState, FormEvent, useRef, useEffect } from 'react'
 import styles from './ChatInterface.module.scss'
 
-export const ChatInterface = () => {
+interface ChatInterfaceProps {
+  chatName?: string;
+}
+
+export const ChatInterface = ({ chatName = 'МТС Ассистент' }: ChatInterfaceProps) => {
   const [messages, setMessages] = useState<{text: string, isUser: boolean}[]>([]);
   const [inputValue, setInputValue] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -35,7 +39,7 @@ export const ChatInterface = () => {
   return (
     <div className={styles.chatInterface}>
       <div className={styles.chatHeader}>
-        <h2>МТС Ассистент</h2>
+        <h2>{chatName}</h2>
       </div>
       
       <div className={styles.messagesContainer}>
