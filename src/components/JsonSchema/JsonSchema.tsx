@@ -1,19 +1,42 @@
 import { useState } from 'react'
 import styles from './JsonSchema.module.scss'
+import JsonFormatter from 'react-json-formatter'
 
 const initialSchema = `{
-  "type": "object",
-  "properties": {
-    "order": {
-      "type": "object",
-      "properties": {
-        "items": {
-          "type": "array"
-        }
-      }
-    }
+  "name": "zadacha-158",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+  "dev": "vite",
+  "build": "tsc && vite build",
+  "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+  "preview": "vite preview",
+  "deploy": "npm run build && gh-pages -d dist"
+  },
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-json-formatter": "^0.4.0",
+    "react-resizable-panels": "^2.1.7"
+  },
+  "devDependencies": {
+    "@types/node": "^22.14.1",
+    "@types/react": "^18.2.37",
+    "@types/react-dom": "^18.2.15",
+    "@typescript-eslint/eslint-plugin": "^6.10.0",
+    "@typescript-eslint/parser": "^6.10.0",
+    "@vitejs/plugin-react": "^4.2.0",
+    "eslint": "^8.53.0",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "eslint-plugin-react-refresh": "^0.4.4",
+    "gh-pages": "^6.3.0",
+    "sass": "^1.69.5",
+    "typescript": "^5.2.2",
+    "vite": "^5.0.0"
   }
-}`
+}
+`
 
 export const JsonSchema = () => {
   const [activeTab, setActiveTab] = useState<'code' | 'visualization' | 'preview'>('code')
@@ -35,15 +58,6 @@ export const JsonSchema = () => {
     } catch (e) {
       console.error('Ошибка при парсинге JSON', e)
     }
-  }
-  
-  // Форматирование строки кода с подсветкой синтаксиса
-  const formatCodeLine = (line: string) => {
-    return line
-      .replace(/"([^"]+)":/g, '<span class="property">"$1"</span>:')
-      .replace(/: "([^"]+)"/g, ': <span class="string">"$1"</span>')
-      .replace(/"type": "([^"]+)"/g, '"type": <span class="type">"$1"</span>')
-      .replace(/([{}[\]])/g, '<span class="bracket">$1</span>')
   }
   
   return (
@@ -77,12 +91,15 @@ export const JsonSchema = () => {
         {activeTab === 'code' && (
           <div className={styles.codeTab}>
             <pre className={styles.codeEditor}>
-              {schema.split('\n').map((line, index) => (
-                <div key={index} className={styles.codeLine}>
-                  <span className={styles.lineNumber}>{index + 1}</span>
-                  <code dangerouslySetInnerHTML={{ __html: formatCodeLine(line) }} />
-                </div>
-              ))}
+            <JsonFormatter 
+              json={initialSchema}
+              tabWith={2}
+              jsonStyle={{
+                propertyStyle: { color: 'red' },
+                stringStyle: { color: 'green' },
+                numberStyle: { color: 'darkorange' }
+              }}
+            />
             </pre>
           </div>
         )}
