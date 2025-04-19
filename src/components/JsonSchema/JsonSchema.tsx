@@ -3,73 +3,67 @@ import styles from './JsonSchema.module.scss'
 import ReactJson from 'react-json-view'
 import CodeMirror from '@uiw/react-codemirror'
 import { json } from '@codemirror/lang-json'
-import { EditorView } from '@codemirror/view'
-
+import { JsonVisualizer } from './JsonVisualizer/JsonVisualizer'
 
 const initialSchema = {
-  "name": "zadacha-158",
-  "private": true,
-  "version": "0.0.0",
-  "type": "module",
-  "scripts": {
-    "dev": "vite",
-    "build": "tsc && vite build",
-    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
-    "preview": "vite preview",
-    "deploy": "npm run build && gh-pages -d dist"
-  },
-  "dependencies": {
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "react-json-formatter": "^0.4.0",
-    "react-resizable-panels": "^2.1.7"
-  },
-  "devDependencies": {
-    "@types/node": "^22.14.1",
-    "@types/react": "^18.2.37",
-    "@types/react-dom": "^18.2.15",
-    "@typescript-eslint/eslint-plugin": "^6.10.0",
-    "@typescript-eslint/parser": "^6.10.0",
-    "@vitejs/plugin-react": "^4.2.0",
-    "eslint": "^8.53.0",
-    "eslint-plugin-react-hooks": "^4.6.0",
-    "eslint-plugin-react-refresh": "^0.4.4",
-    "gh-pages": "^6.3.0",
-    "sass": "^1.69.5",
-    "typescript": "^5.2.2",
-    "vite": "^5.0.0"
-  },
-  "devDependencies2": {
-    "@types/node": "^22.14.1",
-    "@types/react": "^18.2.37",
-    "@types/react-dom": "^18.2.15",
-    "@typescript-eslint/eslint-plugin": "^6.10.0",
-    "@typescript-eslint/parser": "^6.10.0",
-    "@vitejs/plugin-react": "^4.2.0",
-    "eslint": "^8.53.0",
-    "eslint-plugin-react-hooks": "^4.6.0",
-    "eslint-plugin-react-refresh": "^0.4.4",
-    "gh-pages": "^6.3.0",
-    "sass": "^1.69.5",
-    "typescript": "^5.2.2",
-    "vite": "^5.0.4"
-  },
-  "devDependencies3": {
-    "@types/node": "^22.14.1",
-    "@types/react": "^18.2.37",
-    "@types/react-dom": "^18.2.15",
-    "@typescript-eslint/eslint-plugin": "^6.10.0",
-    "@typescript-eslint/parser": "^6.10.0",
-    "@vitejs/plugin-react": "^4.2.0",
-    "eslint": "^8.53.0",
-    "eslint-plugin-react-hooks": "^4.6.0",
-    "eslint-plugin-react-refresh": "^0.4.4",
-    "gh-pages": "^6.3.0",
-    "sass": "^1.69.5",
-    "typescript": "^5.2.2",
-    "vite": "^5.0.1"
+    "id": 1,
+    "name": "Аренда квартир посуточно",
+    "description": "Мы предлагаем вам аренду квартир посуточно в центре города",
+    "services": [
+      {
+        "id": 1,
+        "name": "Аренда квартиры",
+        "description": "Аренда квартиры посуточно",
+        "price": 1000,
+        "currency": "RUB"
+      },
+      {
+        "id": 2,
+        "name": "Услуги хостесс",
+        "description": "Услуги хостесс: прием и выдача ключей, обеспечение чистотой и безопасностью",
+        "price": 500,
+        "currency": "RUB"
+      },
+      {
+        "id": 3,
+        "name": "Парковка",
+        "description": "Парковка автомобиля на месте",
+        "price": 200,
+        "currency": "RUB"
+      },
+      {
+        "id": 4,
+        "name": "Доставка еды",
+        "description": "Доставка еды из nearby ресторанов",
+        "price": 300,
+        "currency": "RUB"
+      }
+    ],
+    "payment_methods": [
+      {
+        "id": 1,
+        "name": "Наличные",
+        "description": "Наличные"
+      },
+      {
+        "id": 2,
+        "name": "Кредитная карта",
+        "description": "Кредитная карта"
+      },
+      {
+        "id": 3,
+        "name": "Банковский перевод",
+        "description": "Банковский перевод"
+      }
+    ],
+    "address": {
+      "street": "Ленина",
+      "house": 12,
+      "apartment": 5
+    }
   }
-}
+
+
 
 export const JsonSchema = () => {
   const [activeTab, setActiveTab] = useState<'code' | 'visualization' | 'preview' | 'editor'>('code')
@@ -122,14 +116,14 @@ export const JsonSchema = () => {
       <div className={styles.schemaContent}>
         {activeTab === 'code' && (
           <div className={styles.codeTab}>
-            <pre className={styles.codeEditor}>
+            <div className={`${styles.codeEditor}`}>
               <ReactJson
                 src={schema}
                 style={{ backgroundColor: 'transparent' }}
                 displayDataTypes={false}
                 enableClipboard={true}
               />
-            </pre>
+            </div>
           </div>
         )}
 
@@ -140,22 +134,19 @@ export const JsonSchema = () => {
                 <p>{editorError}</p>
               </div>
             )}
-            <CodeMirror
-              value={JSON.stringify(schema, null, 2)}
-              height="100%"
-              extensions={[
-                json(),
-                EditorView.lineWrapping
-              ]}
-              onChange={handleEditorChange}
-              className={styles.codeMirrorEditor}
-            />
+              <CodeMirror
+                value={JSON.stringify(schema, null, 2)}
+                height="100%"
+                extensions={[json()]}
+                onChange={handleEditorChange}
+                className={styles.codeMirrorEditor}
+              />
           </div>
         )}
 
         {activeTab === 'visualization' && (
           <div className={styles.visualizationTab}>
-            <p>Визуализация схемы будет здесь</p>
+            <JsonVisualizer data={schema} />
           </div>
         )}
 
