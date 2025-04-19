@@ -116,14 +116,14 @@ export const JsonSchema = () => {
           </div>
         )}
         
-        {!hasCustomerField && (
+        {/* {!hasCustomerField && (
           <div className={styles.errorMessage}>
             <p>Внимание! Отсутствует обязательное поле: "customer" в объекте "order"</p>
             <button className={styles.addButton} onClick={addCustomerField}>
               <span className={styles.addIcon}>⊕</span> Добавить автоматически
             </button>
           </div>
-        )}
+        )} */}
       </div>
     </div>
   )

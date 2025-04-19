@@ -14,6 +14,7 @@ export const Home = () => {
         storageKeyPrefix="home_"
         initialLeftSize={50}
         initialRightSize={50}
+        showControls={false}
       />
     </div>
   )
