@@ -7,7 +7,7 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  background-color: $color-white;
+  // background-color: $color-white;
   flex: 1;
   margin: 10px 0 10px 10px;
   border-radius: 20px;
@@ -16,7 +16,7 @@
   transition: none;
   position: relative;
   z-index: 1;
-  border: 1px solid $color-gray-light;
+  border: 4px solid $color-gray-light;
   
   &:hover {
     transform: none;
@@ -61,18 +61,18 @@
   
   /* Стилизация скроллбара для WebKit (Chrome, Safari, новые версии Edge) */
   &::-webkit-scrollbar {
-    width: 14px;
+    width: 8px;
   }
   
   &::-webkit-scrollbar-track {
-    background: #f0f0f0;
+    background: transparent;
     border-radius: 8px;
   }
   
   &::-webkit-scrollbar-thumb {
     background-color: $color-red-primary;
     border-radius: 8px;
-    border: 3px solid #f0f0f0;
+    border: 3px solid transparent;
     
     &:hover {
       background-color: darken($color-red-primary, 10%);
@@ -95,16 +95,17 @@
   padding: $spacing-md;
   border-radius: $border-radius-sm;
   animation: fadeIn 0.3s ease-in-out;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
   
   &.userMessage {
     align-self: flex-end;
-    background-color: #E8F1FF;
+    background-color: rgba(232, 241, 255, 0.9);
     border-bottom-right-radius: 4px;
   }
   
   &.assistantMessage {
     align-self: flex-start;
-    background-color: $color-white;
+    background-color: rgba(255, 255, 255, 0.9);
     border-bottom-left-radius: 4px;
   }
 }
@@ -146,8 +147,8 @@
 .inputArea {
   display: flex;
   padding: $spacing-md;
-  background-color: $color-white;
-  border-top: 1px solid $color-gray-medium;
+  background-color: transparent;
+  border-top: none;
 }
 
 .messageInput {
@@ -155,7 +156,7 @@
   padding: $spacing-md;
   border-radius: $border-radius-sm;
   border: 1px solid $color-gray-medium;
-  background-color: $color-white;
+  background-color: rgba(255, 255, 255, 0.9);
   font-size: $font-size-md;
   
   &:focus {

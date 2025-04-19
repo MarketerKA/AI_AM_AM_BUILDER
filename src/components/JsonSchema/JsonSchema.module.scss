@@ -98,14 +98,14 @@
   }
   
   &::-webkit-scrollbar-track {
-    background: #f0f0f0;
+    background: transparent;
     border-radius: 8px;
   }
   
   &::-webkit-scrollbar-thumb {
     background-color: $color-red-primary;
     border-radius: 8px;
-    border: 3px solid #f0f0f0;
+    border: 3px solid #fcfcfc;
     
     &:hover {
       background-color: darken($color-red-primary, 10%);
@@ -113,7 +113,7 @@
   }
   
   &::-webkit-scrollbar-corner {
-    background-color: #f0f0f0;
+    background-color: transparent;
   }
 }
 
