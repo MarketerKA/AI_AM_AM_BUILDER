@@ -1,18 +1,22 @@
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import styles from './JsonSchema.module.scss'
-import JsonFormatter from 'react-json-formatter'
+import ReactJson from 'react-json-view'
+import CodeMirror from '@uiw/react-codemirror'
+import { json } from '@codemirror/lang-json'
+import { EditorView } from '@codemirror/view'
 
-const initialSchema = `{
+
+const initialSchema = {
   "name": "zadacha-158",
   "private": true,
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-  "dev": "vite",
-  "build": "tsc && vite build",
-  "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
-  "preview": "vite preview",
-  "deploy": "npm run build && gh-pages -d dist"
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+    "preview": "vite preview",
+    "deploy": "npm run build && gh-pages -d dist"
   },
   "dependencies": {
     "react": "^18.2.0",
@@ -65,70 +69,96 @@ const initialSchema = `{
     "typescript": "^5.2.2",
     "vite": "^5.0.1"
   }
-    
 }
-`
 
 export const JsonSchema = () => {
-  const [activeTab, setActiveTab] = useState<'code' | 'visualization' | 'preview'>('code')
-  const [schema] = useState(initialSchema)
-  // Стили для форматтера JSON
-  const jsonStyle = {
-    propertyStyle: { color: '#E30613', fontWeight: 'bold' },
-    stringStyle: { color: '#28a745' },
-    numberStyle: { color: '#0066cc', fontWeight: 'bold' },
-    booleanStyle: { color: '#ff8c00', fontWeight: 'bold' },
-    colonStyle: { color: '#333' },
-    commaStyle: { color: '#333' },
-    braceStyle: { color: '#444', lineHeight: 1.8 }
-  }
-  
+  const [activeTab, setActiveTab] = useState<'code' | 'visualization' | 'preview' | 'editor'>('code')
+  const [schema, setSchema] = useState(initialSchema)
+  const [editorError, setEditorError] = useState<string | null>(null)
+
+  const handleEditorChange = useCallback((value: string) => {
+    try {
+      const parsedValue = JSON.parse(value)
+      setSchema(parsedValue)
+      setEditorError(null)
+    } catch (e) {
+      setEditorError('Invalid JSON format')
+    }
+  }, [])
+
   return (
     <div className={styles.jsonSchema}>
       <div className={styles.schemaHeader}>
         <h2>JSON Schema Editor</h2>
       </div>
-      
+
       <div className={styles.tabs}>
-        <button 
+        <button
           className={`${styles.tabButton} ${activeTab === 'code' ? styles.active : ''}`}
           onClick={() => setActiveTab('code')}
         >
           Код
         </button>
-        <button 
+        <button
           className={`${styles.tabButton} ${activeTab === 'visualization' ? styles.active : ''}`}
           onClick={() => setActiveTab('visualization')}
         >
           Визуализация
         </button>
-        <button 
+        <button
+          className={`${styles.tabButton} ${activeTab === 'editor' ? styles.active : ''}`}
+          onClick={() => setActiveTab('editor')}
+        >
+          Редактировать
+        </button>
+        <button
           className={`${styles.tabButton} ${activeTab === 'preview' ? styles.active : ''}`}
           onClick={() => setActiveTab('preview')}
         >
           Предпросмотр
         </button>
       </div>
-      
+
       <div className={styles.schemaContent}>
         {activeTab === 'code' && (
           <div className={styles.codeTab}>
             <pre className={styles.codeEditor}>
-              <JsonFormatter 
-                json={schema}
-                tabWith={4}
-                jsonStyle={jsonStyle}
+              <ReactJson
+                src={schema}
+                style={{ backgroundColor: 'transparent' }}
+                displayDataTypes={false}
+                enableClipboard={true}
               />
             </pre>
           </div>
         )}
-        
+
+        {activeTab === 'editor' && (
+          <div className={styles.editorTab}>
+            {editorError && (
+              <div className={styles.errorMessage}>
+                <p>{editorError}</p>
+              </div>
+            )}
+            <CodeMirror
+              value={JSON.stringify(schema, null, 2)}
+              height="100%"
+              extensions={[
+                json(),
+                EditorView.lineWrapping
+              ]}
+              onChange={handleEditorChange}
+              className={styles.codeMirrorEditor}
+            />
+          </div>
+        )}
+
         {activeTab === 'visualization' && (
           <div className={styles.visualizationTab}>
             <p>Визуализация схемы будет здесь</p>
           </div>
         )}
-        
+
         {activeTab === 'preview' && (
           <div className={styles.previewTab}>
             <p>Предпросмотр данных будет здесь</p>
@@ -137,4 +167,4 @@ export const JsonSchema = () => {
       </div>
     </div>
   )
-} 
+}
