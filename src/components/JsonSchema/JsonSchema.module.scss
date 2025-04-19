@@ -72,6 +72,7 @@
   overflow-y: auto;
   background-color: #f8f9fa;
   padding: $spacing-sm 0;
+  overflow-x: scroll;
 }
 
 .codeEditor {
@@ -79,7 +80,6 @@
   padding: 0;
   font-family: 'Consolas', 'Monaco', monospace;
   white-space: pre;
-  overflow-x: auto;
   counter-reset: line;
 }
 
