@@ -71,8 +71,7 @@ const initialSchema = `{
 
 export const JsonSchema = () => {
   const [activeTab, setActiveTab] = useState<'code' | 'visualization' | 'preview'>('code')
-  const [schema, setSchema] = useState(initialSchema)
-  
+  const [schema] = useState(initialSchema)
   // Стили для форматтера JSON
   const jsonStyle = {
     propertyStyle: { color: '#E30613', fontWeight: 'bold' },
