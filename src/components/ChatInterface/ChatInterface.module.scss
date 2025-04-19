@@ -2,22 +2,37 @@
 @import '../../styles/mixins.scss';
 
 .chatInterface {
-  @include card;
   width: 100%;
   height: 100%;
   display: flex;
   flex-direction: column;
-  border-radius: $border-radius-md;
   overflow: hidden;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  background-color: $color-white;
   flex: 1;
+  margin: 10px 0 10px 10px;
+  border-radius: 20px;
+  box-shadow: none;
+  transform: none;
+  transition: none;
+  position: relative;
+  z-index: 1;
+  border: 1px solid $color-gray-light;
+  
+  &:hover {
+    transform: none;
+    box-shadow: none;
+  }
+  
+  &:before {
+    display: none;
+  }
   
   @media (max-width: 1366px) {
-    // На более мелких экранах тоже растягиваемся
+    height: 100%;
   }
   
   @media (max-width: 1024px) {
-    margin-bottom: $spacing-md;
+    margin-bottom: 0;
   }
 }
 
@@ -25,6 +40,7 @@
   background-color: $color-red-primary;
   padding: $spacing-md $spacing-lg;
   color: $color-white;
+  border-radius: 18px 18px 0 0;
   
   h2 {
     margin: 0;
@@ -36,7 +52,7 @@
 .messagesContainer {
   flex: 1;
   padding: $spacing-md;
-  overflow-y: auto;
+  overflow-y: scroll;
   background-color: $color-gray-light;
   display: flex;
   flex-direction: column;
@@ -45,16 +61,22 @@
   
   /* Стилизация скроллбара для WebKit (Chrome, Safari, новые версии Edge) */
   &::-webkit-scrollbar {
-    width: 8px;
+    width: 14px;
   }
   
   &::-webkit-scrollbar-track {
-    background: $color-gray-light;
+    background: #f0f0f0;
+    border-radius: 8px;
   }
   
   &::-webkit-scrollbar-thumb {
-    background-color: $color-gray-medium;
-    border-radius: 20px;
+    background-color: $color-red-primary;
+    border-radius: 8px;
+    border: 3px solid #f0f0f0;
+    
+    &:hover {
+      background-color: darken($color-red-primary, 10%);
+    }
   }
 }
 

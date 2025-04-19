@@ -2,29 +2,44 @@
 @import '../../styles/mixins.scss';
 
 .jsonSchema {
-  @include card;
   width: 100%;
-  height: 100%;
+  height: 100vh;
   display: flex;
   flex-direction: column;
-  border-radius: $border-radius-md;
+  border-radius: 20px;
   overflow: hidden;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
   flex: 1;
+  box-shadow: 0 0 35px rgba(0, 0, 0, 0.2);
+  margin: 10px;
+  border: 1px solid $color-gray-light;
+  transform: none;
+  transition: box-shadow 0.3s ease;
+  position: relative;
+  z-index: 1;
+  
+  &:hover {
+    transform: none;
+    box-shadow: 0 0 35px rgba(0, 0, 0, 0.2);
+  }
   
   @media (max-width: 1366px) {
-    // На более мелких экранах тоже растягиваемся
+    height: 100%;
   }
   
   @media (max-width: 1024px) {
     margin-bottom: 0;
+    height: 100%;
   }
 }
 
 .schemaHeader {
-  background-color: $color-red-primary;
+  background-color: $color-white;
   padding: $spacing-md $spacing-lg;
-  color: $color-white;
+  color: $color-red-primary;
+  border-bottom: 2px solid $color-red-primary;
+  border-radius: 18px 18px 0 0;
+  position: relative;
+  z-index: 2;
   
   h2 {
     margin: 0;
@@ -60,24 +75,51 @@
 }
 
 .schemaContent {
+  overflow: hidden;
   display: flex;
   flex-direction: column;
   flex: 1;
-  overflow: hidden;
   position: relative;
+  background-color: $color-white;
 }
 
 .codeTab {
   flex: 1;
-  overflow-y: auto;
-  background-color: #f8f9fa;
-  padding: $spacing-sm 0;
-  overflow-x: scroll;
+  overflow-y: scroll;
+  background-color: #fcfcfc;
+  padding: $spacing-md;
+  overflow-x: auto;
+  height: calc(100vh - 110px);
+  
+  /* Стилизация скроллбара для WebKit (Chrome, Safari, новые версии Edge) */
+  &::-webkit-scrollbar {
+    width: 14px;
+    height: 10px;
+  }
+  
+  &::-webkit-scrollbar-track {
+    background: #f0f0f0;
+    border-radius: 8px;
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background-color: $color-red-primary;
+    border-radius: 8px;
+    border: 3px solid #f0f0f0;
+    
+    &:hover {
+      background-color: darken($color-red-primary, 10%);
+    }
+  }
+  
+  &::-webkit-scrollbar-corner {
+    background-color: #f0f0f0;
+  }
 }
 
 .codeEditor {
   margin: 0;
-  padding: 0;
+  padding: 0 $spacing-md;
   font-family: 'Consolas', 'Monaco', monospace;
   white-space: pre;
   counter-reset: line;

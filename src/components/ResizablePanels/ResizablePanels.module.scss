@@ -2,91 +2,151 @@
 @import '../../styles/mixins.scss';
 
 .container {
-  display: flex;
-  flex-direction: column;
   width: 100%;
   height: 100%;
+  display: flex;
+  flex-direction: column;
   overflow: hidden;
+  padding: 0;
+  background-color: #f9f9f9;
+  border-radius: 20px;
+  margin: 0;
 }
 
 .controls {
   display: flex;
-  justify-content: center;
-  gap: $spacing-md;
-  margin-bottom: $spacing-md;
+  background-color: $color-white;
+  border-bottom: 1px solid $color-gray-light;
+  padding: $spacing-xs 0;
+  border-radius: 20px 20px 20px 20px;
 }
 
 .controlButton {
-  background-color: $color-white;
-  border: 1px solid $color-gray-medium;
-  border-radius: $border-radius-md;
   padding: $spacing-xs $spacing-md;
-  font-size: $font-size-md;
+  margin: 0 $spacing-xs;
+  background: none;
+  border: 1px solid $color-gray-medium;
+  border-radius: $border-radius-sm;
+  font-size: $font-size-sm;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: $transition-default;
   
   &:hover {
-    border-color: $color-red-primary;
-    color: $color-red-primary;
-  }
-  
-  &:active {
-    background-color: $color-red-primary;
-    color: $color-white;
+    background-color: $color-gray-light;
   }
 }
 
 .panelsContainer {
   display: flex;
-  width: 100%;
   flex: 1;
+  width: 100%;
+  height: 100%;
   overflow: hidden;
+  padding: 0;
   
-  @media (max-width: 1024px) {
-    flex-direction: column;
+  > div {
+    width: 100%;
+    height: 100%;
+    border-radius: inherit;
   }
 }
 
-.panelLeft, 
-.panelRight {
+.panelLeft, .panelRight {
   height: 100%;
+  overflow: hidden;
+  padding: 0;
+  position: relative;
+  
+  &:after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    pointer-events: none;
+    z-index: 1;
+    border-radius: inherit;
+  }
+}
+
+.panelRight {
+  border-radius: 20px 20px 20px 0;
+  
+  &:after {
+    box-shadow: none;
+    border-radius: inherit;
+  }
+}
+
+.panelLeft {
+  border-radius: 20px 0 0 20px;
 }
 
 .panelContent {
+  height: 100%;
   display: flex;
   flex-direction: column;
-  width: 100%;
-  height: 100%;
   overflow: hidden;
+  border-radius: inherit;
 }
 
 .panelTitle {
-  margin: 0 0 $spacing-md;
-  color: $color-text;
-  font-size: $font-size-lg;
-  font-weight: 600;
+  margin: 0;
+  padding: $spacing-md;
+  font-size: $font-size-md;
+  font-weight: 500;
+  border-bottom: 1px solid $color-gray-light;
 }
 
 .resizeHandle {
-  width: 8px;
+  width: 6px;
   background-color: $color-gray-medium;
-  border-radius: 4px;
+  position: relative;
+  margin: 10px 0;
+  border-radius: 3px;
   cursor: col-resize;
-  transition: background-color 0.2s;
-  margin: 0 4px;
+  transition: background-color 0.2s ease;
+  z-index: 5;
   
   &:hover {
     background-color: $color-red-primary;
   }
   
-  &:active {
-    background-color: $color-red-primary;
+  &::before {
+    content: '⋮';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    font-size: 20px;
+    line-height: 1;
+    text-align: center;
+    z-index: 2;
   }
   
-  @media (max-width: 1024px) {
-    width: 100%;
-    height: 8px;
-    margin: 4px 0;
-    cursor: row-resize;
+  &::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 24px;
+    height: 80px;
+    background-color: rgba(255, 255, 255, 0.8);
+    border-radius: 10px;
+    border: 1px solid $color-gray-light;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: col-resize;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+  }
+  
+  &:hover::after {
+    opacity: 0.9;
   }
 } 
