@@ -1,6 +1,8 @@
 import { useState, FormEvent, useRef, useEffect } from 'react'
 import styles from './ChatInterface.module.scss'
-import apiService, { ChatMessage as ApiChatMessage, SchemaData } from '@/services/api'
+import apiService from '@/services/api'
+import { ChatMessage as ApiChatMessage, SchemaData } from '@/types/api'
+import { API_URL, DEFAULT_REQUEST_CONFIG, EVENTS } from '@/constants/api'
 
 interface ChatInterfaceProps {
   chatName?: string;
@@ -34,11 +36,11 @@ export const ChatInterface = ({ chatName = 'МТС Ассистент' }: ChatIn
       
       if (isOnline) {
         setMessages([
-          { text: 'API сервер доступен и готов к работе', isUser: false }
+          { text: `API сервер доступен и готов к работе (${API_URL})`, isUser: false }
         ]);
       } else {
         setMessages([
-          { text: 'Ошибка подключения к API серверу. Пожалуйста, убедитесь, что сервер запущен на http://localhost:8000', isUser: false }
+          { text: `Ошибка подключения к API серверу. Пожалуйста, убедитесь, что сервер запущен на ${API_URL}`, isUser: false }
         ]);
       }
     };
@@ -86,8 +88,10 @@ export const ChatInterface = ({ chatName = 'МТС Ассистент' }: ChatIn
         
         // Отправляем запрос к API
         const response = await apiService.chatCompletion({
-          model: 'mws-gpt-alpha',
-          messages: apiMessages
+          model: DEFAULT_REQUEST_CONFIG.MODEL,
+          messages: apiMessages,
+          temperature: DEFAULT_REQUEST_CONFIG.TEMPERATURE,
+          max_tokens: DEFAULT_REQUEST_CONFIG.MAX_TOKENS
         });
         
         if (response.success && response.data) {
@@ -95,7 +99,7 @@ export const ChatInterface = ({ chatName = 'МТС Ассистент' }: ChatIn
           console.log("Получен ответ от API:", aiMessageContent);
           
           // Извлекаем JSON из ответа, если он есть
-          const schemaData = apiService.extractSchemaFromResponse(aiMessageContent);
+          const schemaData = extractSchemaFromResponse(aiMessageContent);
           
           // Добавляем только текстовое объяснение в чат
           let explanationText = aiMessageContent;
@@ -150,6 +154,18 @@ export const ChatInterface = ({ chatName = 'МТС Ассистент' }: ChatIn
       } finally {
         setIsLoading(false);
       }
+    }
+  };
+  
+  // Импортируем функцию извлечения JSON
+  const extractSchemaFromResponse = (text: string): SchemaData | null => {
+    try {
+      // Импортируем динамически во избежание циклических зависимостей
+      const { extractSchemaFromResponse } = require('@/utils/jsonExtractor');
+      return extractSchemaFromResponse(text);
+    } catch (error) {
+      console.error('Error importing jsonExtractor:', error);
+      return null;
     }
   };
   

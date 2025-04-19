@@ -4,9 +4,15 @@ import ReactJson from 'react-json-view'
 import CodeMirror from '@uiw/react-codemirror'
 import { json } from '@codemirror/lang-json'
 import { EditorView } from '@codemirror/view'
-import webSocketService, { WebSocketMessage } from '@/services/webSocketService'
-import apiService, { SchemaData } from '@/services/api'
+import webSocketService from '@/services/webSocketService'
+import apiService from '@/services/api'
+import { SchemaData, WebSocketMessage } from '@/types/api'
+import { EVENTS } from '@/constants/api'
 
+// Обновляю интерфейс типов для схемы, чтобы избежать ошибок TypeScript
+interface SchemaType {
+  [key: string]: any;
+}
 
 const initialSchema = {
   "id": "uuid",
@@ -16,13 +22,8 @@ const initialSchema = {
   "note": "Отправьте запрос в чате, чтобы получить схему"
 }
 
-// Обновляю интерфейс типов для схемы, чтобы избежать ошибок TypeScript
-interface SchemaType {
-  [key: string]: any;
-}
-
 export const JsonSchema = () => {
-  const [activeTab, setActiveTab] = useState<'code' | 'visualization' | 'preview' | 'editor'>('code')
+  const [activeTab, setActiveTab] = useState<'code' | 'editor'>('code')
   const [schema, setSchema] = useState<SchemaType>(initialSchema)
   const [editorError, setEditorError] = useState<string | null>(null)
   const [isConnected, setIsConnected] = useState(false)
@@ -92,22 +93,22 @@ export const JsonSchema = () => {
     };
 
     // Подписка на события WebSocket
-    webSocketService.on('connect', handleConnect);
-    webSocketService.on('disconnect', handleDisconnect);
-    webSocketService.on('error', handleError);
-    webSocketService.on('system', handleSystem);
-    webSocketService.on('schema', handleSchema);
+    webSocketService.on(EVENTS.CONNECT, handleConnect);
+    webSocketService.on(EVENTS.DISCONNECT, handleDisconnect);
+    webSocketService.on(EVENTS.ERROR, handleError);
+    webSocketService.on(EVENTS.SYSTEM, handleSystem);
+    webSocketService.on(EVENTS.SCHEMA_UPDATE, handleSchema);
 
     // Установка соединения
     webSocketService.connect();
 
     // Отписка от событий при размонтировании компонента
     return () => {
-      webSocketService.off('connect', handleConnect);
-      webSocketService.off('disconnect', handleDisconnect);
-      webSocketService.off('error', handleError);
-      webSocketService.off('system', handleSystem);
-      webSocketService.off('schema', handleSchema);
+      webSocketService.off(EVENTS.CONNECT, handleConnect);
+      webSocketService.off(EVENTS.DISCONNECT, handleDisconnect);
+      webSocketService.off(EVENTS.ERROR, handleError);
+      webSocketService.off(EVENTS.SYSTEM, handleSystem);
+      webSocketService.off(EVENTS.SCHEMA_UPDATE, handleSchema);
       webSocketService.disconnect();
     };
   }, []);
@@ -122,7 +123,7 @@ export const JsonSchema = () => {
       // Отправка обновленной схемы через WebSocket, если подключено
       if (isConnected) {
         webSocketService.sendMessage({
-          type: 'update_schema',
+          type: EVENTS.SCHEMA_UPDATE,
           content: 'Schema update',
           data: { schema: parsedValue }
         });
