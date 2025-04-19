@@ -40,11 +40,91 @@
   border-radius: 18px 18px 0 0;
   position: relative;
   z-index: 2;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   
   h2 {
     margin: 0;
     font-size: $font-size-lg;
     font-weight: 600;
+  }
+}
+
+.statusIndicator {
+  display: flex;
+  align-items: center;
+  font-size: $font-size-sm;
+  color: $color-gray-dark;
+  
+  span {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin-right: 8px;
+  }
+  
+  .connected {
+    background-color: #2ecc71;
+    box-shadow: 0 0 6px rgba(46, 204, 113, 0.6);
+  }
+  
+  .disconnected {
+    background-color: #e74c3c;
+    box-shadow: 0 0 6px rgba(231, 76, 60, 0.6);
+  }
+  
+  .statusMessage {
+    padding: 4px 8px;
+    background-color: rgba(0, 0, 0, 0.1);
+    border-radius: 4px;
+    animation: fadeOut 3s forwards;
+  }
+}
+
+@keyframes fadeOut {
+  0% {
+    opacity: 1;
+  }
+  70% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.5;
+  }
+}
+
+.actionsBar {
+  display: flex;
+  padding: $spacing-sm;
+  background-color: $color-gray-light;
+  border-bottom: 1px solid $color-gray-medium;
+  justify-content: space-between;
+}
+
+.actions {
+  display: flex;
+  gap: 10px;
+}
+
+.actionButton {
+  background-color: $color-red-primary;
+  color: $color-white;
+  border: none;
+  padding: $spacing-xs $spacing-md;
+  border-radius: $border-radius-sm;
+  font-size: $font-size-sm;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  
+  &:hover {
+    background-color: darken($color-red-primary, 10%);
+  }
+  
+  &:disabled {
+    background-color: $color-gray-medium;
+    cursor: not-allowed;
   }
 }
 
@@ -118,11 +198,33 @@
 }
 
 .codeEditor {
-  margin: 0;
-  padding: 0 $spacing-md;
+  padding: $spacing-md;
   font-family: 'Consolas', 'Monaco', monospace;
-  white-space: pre;
-  counter-reset: line;
+  height: calc(100% - 40px);
+  overflow: auto;
+  
+  /* Улучшенные стили для React-Json-View */
+  :global {
+    .react-json-view {
+      background-color: transparent !important;
+      
+      .variable-value {
+        margin-left: 8px;
+      }
+      
+      .object-key {
+        color: $color-red-primary !important;
+      }
+      
+      .string-value {
+        color: #28a745 !important;
+      }
+      
+      .variable-row {
+        padding: 3px 0;
+      }
+    }
+  }
 }
 
 .codeLine {
@@ -237,4 +339,22 @@ code {
 .addIcon {
   font-size: 1.2em;
   margin-right: $spacing-xs;
+}
+
+.updatedBadge {
+  padding: 2px 6px;
+  background-color: #2ecc71;
+  color: white;
+  border-radius: 4px;
+  font-size: 0.8em;
+  font-weight: 500;
+}
+
+.schemaInfo {
+  margin-left: auto;
+  font-size: 0.9em;
+  color: $color-gray-dark;
+  display: flex;
+  align-items: center;
+  padding: 0 10px;
 }
