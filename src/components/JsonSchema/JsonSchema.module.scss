@@ -1,5 +1,6 @@
 @import '../../styles/variables.scss';
 @import '../../styles/mixins.scss';
+@import '../../styles/theme.scss';
 
 .jsonSchema {
   width: 100%;
@@ -9,18 +10,12 @@
   border-radius: 20px;
   overflow: hidden;
   flex: 1;
-  box-shadow: 0 0 35px rgba(0, 0, 0, 0.2);
-  margin: 10px;
-  border: 1px solid $color-gray-light;
+  border: 1px solid var(--border-color);
+  background-color: var(--bg-primary);
   transform: none;
   transition: box-shadow 0.3s ease;
   position: relative;
   z-index: 1;
-  
-  &:hover {
-    transform: none;
-    box-shadow: 0 0 35px rgba(0, 0, 0, 0.2);
-  }
   
   @media (max-width: 1366px) {
     height: 100%;
@@ -33,7 +28,7 @@
 }
 
 .schemaHeader {
-  background-color: $color-white;
+  background-color: var(--bg-primary);
   padding: $spacing-md $spacing-lg;
   color: $color-red-primary;
   border-bottom: 2px solid $color-red-primary;
@@ -98,8 +93,8 @@
 .actionsBar {
   display: flex;
   padding: $spacing-sm;
-  background-color: $color-gray-light;
-  border-bottom: 1px solid $color-gray-medium;
+  background-color: var(--bg-primary);
+  border-bottom: 1px solid var(--border-color);
   justify-content: space-between;
 }
 
@@ -130,8 +125,8 @@
 
 .tabs {
   display: flex;
-  background-color: $color-white;
-  border-bottom: 1px solid $color-gray-medium;
+  background-color: var(--bg-primary);
+  border-bottom: 1px solid var(--border-color); 
 }
 
 .tabButton {
@@ -145,7 +140,7 @@
   transition: $transition-default;
   
   &:hover {
-    background-color: $color-gray-light;
+    background-color: var(--bg-tertiary);
   }
   
   &.active {
@@ -160,41 +155,17 @@
   flex-direction: column;
   flex: 1;
   position: relative;
-  background-color: $color-white;
+  background-color: var(--bg-tertiary);
 }
 
 .codeTab {
   flex: 1;
   overflow-y: scroll;
-  background-color: #fcfcfc;
-  padding: $spacing-md;
+  background-color: var(--bg-tertiary);
+  padding: 0;
   overflow-x: auto;
+  overflow-y: hidden;
   height: calc(100vh - 110px);
-  
-  /* Стилизация скроллбара для WebKit (Chrome, Safari, новые версии Edge) */
-  &::-webkit-scrollbar {
-    width: 14px;
-    height: 10px;
-  }
-  
-  &::-webkit-scrollbar-track {
-    background: transparent;
-    border-radius: 8px;
-  }
-  
-  &::-webkit-scrollbar-thumb {
-    background-color: $color-red-primary;
-    border-radius: 8px;
-    border: 3px solid #fcfcfc;
-    
-    &:hover {
-      background-color: darken($color-red-primary, 10%);
-    }
-  }
-  
-  &::-webkit-scrollbar-corner {
-    background-color: transparent;
-  }
 }
 
 .codeEditor {
@@ -213,7 +184,7 @@
       }
       
       .object-key {
-        color: $color-red-primary !important;
+        color: var(--accent-color) !important;
       }
       
       .string-value {
@@ -224,6 +195,30 @@
         padding: 3px 0;
       }
     }
+  }
+  /* Стилизация скроллбара для WebKit (Chrome, Safari, новые версии Edge) */
+  &::-webkit-scrollbar {
+    width: 7px;
+    height: 10px;
+  }
+  
+  &::-webkit-scrollbar-track {
+    background: transparent;
+    border-radius: 8px;
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background-color: $color-red-primary;
+    border-radius: 8px;
+    border: 3px solid var(--background-color);
+    
+    &:hover {
+      background-color: $color-red-primary;
+    }
+  }
+  
+  &::-webkit-scrollbar-corner {
+    background-color: transparent;
   }
 }
 
@@ -275,8 +270,8 @@ code {
   flex: 1;
   overflow: auto;
   padding: $spacing-md;
-  background-color: $color-white;
-  color: $color-gray-dark;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
 }
 
 .editorTab {
@@ -291,13 +286,47 @@ code {
     overflow: auto;
     
     :global {
+      .cm-activeLine {
+        background-color: var(--bg-tertiary)
+      }
+      .cm-gutter {
+        background-color: var(--bg-primary);
+        color: $color-red-primary;
+      }
+      .cm-activeLineGutter {
+        background-color: var(--bg-tertiary);
+      }
       .cm-editor {
+        background-color: var(--bg-primary);
         height: 100%;
       }
       
       .cm-scroller {
         font-family: monospace;
         font-size: 14px;
+        &::-webkit-scrollbar {
+          width: 7px;
+          height: 10px;
+        }
+        
+        &::-webkit-scrollbar-track {
+          background: transparent;
+          border-radius: 8px;
+        }
+        
+        &::-webkit-scrollbar-thumb {
+          background-color: $color-red-primary;
+          border-radius: 8px;
+          border: 3px solid var(--background-color);
+          
+          &:hover {
+            background-color: $color-red-primary;
+          }
+        }
+        
+        &::-webkit-scrollbar-corner {
+          background-color: transparent;
+        }
       }
       
       .cm-content {
@@ -305,16 +334,17 @@ code {
       }
     }
   }
+  
 }
 
 .errorMessage {
   position: absolute;
   bottom: 0;
   width: 100%;
-  background-color: #fff3cd;
-  border-top: 1px solid #ffeeba;
+  background-color: var(--bg-warning);
+  border-top: 1px solid var(--border-warning);
   padding: $spacing-md;
-  color: #856404;
+  color: var(--text-warning);
   
   p {
     margin-bottom: $spacing-sm;

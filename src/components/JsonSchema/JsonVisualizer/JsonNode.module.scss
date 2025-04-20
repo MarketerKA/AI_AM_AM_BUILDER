@@ -1,27 +1,28 @@
 @import '../../../styles/variables.scss';
+@import '../../../styles/theme.scss';
 
 .node {
     padding: 10px;
     border-radius: 8px;
-    background: white;
-    border: 2px solid $color-gray-light;
+    background: var(--bg-primary);
+    border: 2px solid var(--border-color);
     min-width: 200px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 6px var(--shadow-color);
     transition: all 0.2s ease;
 
     &:hover {
         box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
-        border-color: $color-red-primary;
+        border-color: var(--accent-color);
     }
 }
 
 .header {
     text-align: center;
     font-weight: 600;
-    color: $color-red-primary;
+    color: var(--accent-color);
     padding-bottom: 8px;
     margin-bottom: 8px;
-    border-bottom: 1px solid $color-gray-light;
+    border-bottom: 1px solid var(--border-color);
     font-size: 14px;
 }
 
@@ -45,18 +46,16 @@
 }
 
 .propertyKey {
-    color: $color-gray-dark;
+    color: var(--text-secondary);
     font-weight: 500;
     margin-right: 8px;
     user-select: none;
 }
 
 .propertyValue {
-    color: #2ecc71;
+    color: var(--accent-color);
     font-family: 'Consolas', monospace;
 }
-
-
 
 .editTextarea {
     justify-content: start;

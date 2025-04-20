@@ -4,6 +4,7 @@ import styles from './App.module.scss'
 import apiService from './services/api'
 import webSocketService from './services/webSocketService'
 import { API_URL } from './constants/api'
+import { ThemeProvider } from '@/contexts/ThemeContext';
 
 function App() {
   // Проверяем доступность API и WebSocket при загрузке приложения
@@ -30,10 +31,12 @@ function App() {
   }, []);
   
   return (
-    <div className={styles.app}>
-      <Home />
-    </div>
+    <ThemeProvider>
+      <div className={styles.app}>
+        <Home />
+      </div>
+    </ThemeProvider>
   )
 }
 
-export default App 
+export default App
