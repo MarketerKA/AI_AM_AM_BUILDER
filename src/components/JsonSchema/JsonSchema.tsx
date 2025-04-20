@@ -164,12 +164,47 @@ export const JsonSchema = () => {
       }
     };
 
+    // Обработчик для полученной JSON схемы
+    const handleJsonGenerated = (message: WebSocketMessage) => {
+      console.log('Получена сгенерированная JSON схема:', message.data);
+      if (message.data) {
+        setSchema(message.data);
+        schemaUpdated.current = true;
+        setStatusMessage('Получена новая JSON схема');
+        
+        // Автоматически переключаемся на вкладку "Код"
+        setActiveTab('code');
+        
+        // Скрываем сообщение через 3 секунды
+        setTimeout(() => {
+          setStatusMessage(null);
+        }, 3000);
+      }
+    };
+
+    // Обработчик для обновленной JSON схемы
+    const handleJsonUpdated = (message: WebSocketMessage) => {
+      console.log('Получена обновленная JSON схема:', message.data);
+      if (message.data) {
+        setSchema(message.data);
+        schemaUpdated.current = true;
+        setStatusMessage('JSON схема успешно обновлена');
+        
+        // Скрываем сообщение через 3 секунды
+        setTimeout(() => {
+          setStatusMessage(null);
+        }, 3000);
+      }
+    };
+
     // Подписка на события WebSocket
     webSocketService.on(EVENTS.CONNECT, handleConnect);
     webSocketService.on(EVENTS.DISCONNECT, handleDisconnect);
     webSocketService.on(EVENTS.ERROR, handleError);
     webSocketService.on(EVENTS.SYSTEM, handleSystem);
     webSocketService.on(EVENTS.SCHEMA_UPDATE, handleSchema);
+    webSocketService.on(EVENTS.JSON_GENERATED, handleJsonGenerated);
+    webSocketService.on(EVENTS.JSON_UPDATED, handleJsonUpdated);
 
     // Установка соединения
     webSocketService.connect();
@@ -181,6 +216,8 @@ export const JsonSchema = () => {
       webSocketService.off(EVENTS.ERROR, handleError);
       webSocketService.off(EVENTS.SYSTEM, handleSystem);
       webSocketService.off(EVENTS.SCHEMA_UPDATE, handleSchema);
+      webSocketService.off(EVENTS.JSON_GENERATED, handleJsonGenerated);
+      webSocketService.off(EVENTS.JSON_UPDATED, handleJsonUpdated);
       webSocketService.disconnect();
     };
   }, []);
@@ -234,15 +271,50 @@ export const JsonSchema = () => {
     }, 3000);
   };
 
+  // Функция для генерации новой схемы через WebSocket
+  const generateNewSchema = (description: string, integration_type: string = "kafka_consumer") => {
+    if (isConnected) {
+      webSocketService.sendMessage({
+        type: "create_schema",
+        content: "Запрос на создание JSON схемы",
+        data: {
+          description,
+          integration_type
+        }
+      });
+      setStatusMessage('Запрос на генерацию JSON схемы отправлен...');
+    } else {
+      setStatusMessage('WebSocket не подключен. Невозможно отправить запрос.');
+    }
+  };
+
+  // Функция для обновления существующей схемы через WebSocket
+  const updateSchema = (updateText: string) => {
+    if (isConnected) {
+      webSocketService.sendMessage({
+        type: "update_schema",
+        content: "Запрос на обновление JSON схемы",
+        data: {
+          update_text: updateText
+        }
+      });
+      setStatusMessage('Запрос на обновление JSON схемы отправлен...');
+    } else {
+      setStatusMessage('WebSocket не подключен. Невозможно отправить запрос.');
+    }
+  };
+
   return (
     <div className={styles.jsonSchema}>
       <div className={styles.schemaHeader}>
         <h2>JSON Schema</h2>
         <div className={styles.statusIndicator} title={statusMessage || ''}>
           {isConnected && <span className={styles.connected}></span>}
-          {/* {statusMessage && <span className={styles.statusMessage}>{statusMessage}</span>} */}
           {schemaUpdated.current && !statusMessage && (
             <span className={styles.updatedBadge}>Обновлено</span>
+          )}
+          {statusMessage && (
+            <span className={styles.statusMessage}>{statusMessage}</span>
           )}
         </div>
       </div>
