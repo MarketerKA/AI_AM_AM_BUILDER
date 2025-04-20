@@ -8,6 +8,7 @@ import webSocketService from '@/services/webSocketService'
 import apiService from '@/services/api'
 import { SchemaData, WebSocketMessage } from '@/types/api'
 import { EVENTS } from '@/constants/api'
+import { JsonVisualizer } from './JsonVisualizer'
 
 // Обновляю интерфейс типов для схемы, чтобы избежать ошибок TypeScript
 interface SchemaType {
@@ -23,7 +24,7 @@ const initialSchema = {
 }
 
 export const JsonSchema = () => {
-  const [activeTab, setActiveTab] = useState<'code' | 'editor'>('code')
+  const [activeTab, setActiveTab] = useState<'code' | 'editor' | 'visualizer'>('code')
   const [schema, setSchema] = useState<SchemaType>(initialSchema)
   const [editorError, setEditorError] = useState<string | null>(null)
   const [isConnected, setIsConnected] = useState(false)
@@ -258,6 +259,12 @@ export const JsonSchema = () => {
         >
           Редактировать
         </button>
+        <button
+          className={`${styles.tabButton} ${activeTab === 'visualizer' ? styles.active : ''}`}
+          onClick={() => setActiveTab('visualizer')}
+        >
+          Визуализация
+        </button>
       </div>
 
       <div className={styles.schemaContent}>
@@ -317,6 +324,12 @@ export const JsonSchema = () => {
               onChange={handleEditorChange}
               className={styles.codeMirrorEditor}
             />
+          </div>
+        )}
+
+        {activeTab === 'visualizer' && (
+          <div className={styles.visualizerTab}>
+            <JsonVisualizer data={schema} />
           </div>
         )}
       </div>

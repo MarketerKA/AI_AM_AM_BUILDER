@@ -358,3 +358,11 @@ code {
   align-items: center;
   padding: 0 10px;
 }
+
+.visualizerTab {
+  flex: 1;
+  height: 100%;
+  overflow: hidden;
+  display: flex;
+  position: relative;
+}
