@@ -11,7 +11,7 @@
   height: 100%;
   flex: 1;
   position: relative;
-  background: #fafafa;
+  background: var(--bg-secondary);
 
   :global {
     .react-flow__controls {
@@ -20,7 +20,7 @@
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
       border-radius: 8px;
       padding: 4px;
-      background: white;
+      background: var(--bg-primary);
 
       button {
         border-radius: 4px;
@@ -28,7 +28,7 @@
         margin: 2px;
 
         &:hover {
-          background: $color-gray-light;
+          background: var(--bg-tertiary);
         }
       }
     }
@@ -59,7 +59,7 @@
   position: absolute;
   top: 10px;
   left: 10px;
-  background-color: rgba(255, 255, 255, 0.9);
+  background-color: var(--bg-primary);
   padding: 10px;
   border-radius: $border-radius-sm;
   font-size: 0.85em;
