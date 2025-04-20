@@ -3,7 +3,6 @@ import { API_URL } from '@/constants/api';
 import { eventBus } from '@/utils/eventBus';
 import { extractSchemaFromResponse } from '@/utils/jsonExtractor';
 import { 
-  ChatMessage, 
   ChatCompletionRequest, 
   ApiResponse, 
   SchemaData 

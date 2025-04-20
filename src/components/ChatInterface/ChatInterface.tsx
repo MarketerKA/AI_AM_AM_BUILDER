@@ -1,9 +1,9 @@
 import { useState, FormEvent, useRef, useEffect } from 'react'
 import styles from './ChatInterface.module.scss'
 import apiService from '@/services/api'
-import { ChatMessage as ApiChatMessage, SchemaData, WebSocketMessage } from '@/types/api'
-import { API_URL, DEFAULT_REQUEST_CONFIG, EVENTS } from '@/constants/api'
-import { extractSchemaFromResponse as extractSchema } from '@/utils/jsonExtractor'
+import { SchemaData, WebSocketMessage } from '@/types/api'
+import { API_URL, EVENTS } from '@/constants/api'
+// import { extractSchemaFromResponse as extractSchema } from '@/utils/jsonExtractor'
 import webSocketService from '@/services/webSocketService'
 
 interface ChatInterfaceProps {
@@ -22,7 +22,7 @@ export const ChatInterface = ({ chatName = 'МТС Ассистент' }: ChatIn
   const [isWsConnected, setIsWsConnected] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   // Флаг, указывающий, что мы ожидаем ответ от WebSocket
-  const [waitingForWsResponse, setWaitingForWsResponse] = useState(false);
+  const [_waitingForWsResponse, setWaitingForWsResponse] = useState(false);
   // Храним последнюю схему, если нам нужно её обновить
   const lastSchemaRef = useRef<any>(null);
   // Добавим переменную для отслеживания, был ли последний запрос пользователя о Kafka
@@ -218,7 +218,7 @@ export const ChatInterface = ({ chatName = 'МТС Ассистент' }: ChatIn
   }, []);
 
   // Обработчик обновления схемы из API
-  const handleSchemaUpdate = (data: SchemaData) => {
+  const handleSchemaUpdate = (_data: SchemaData) => {
     // Обработка оповещений от JsonSchema компонента, если необходимо
   };
   
@@ -348,15 +348,15 @@ export const ChatInterface = ({ chatName = 'МТС Ассистент' }: ChatIn
   };
   
   // Импортируем функцию извлечения JSON
-  const extractSchemaFromResponse = (text: string): SchemaData | null => {
-    try {
-      // Используем импортированную функцию
-      return extractSchema(text);
-    } catch (error) {
-      console.error('Error extracting schema:', error);
-      return null;
-    }
-  };
+  // const extractSchemaFromResponse = (text: string): SchemaData | null => {
+  //   try {
+  //     // Используем импортированную функцию
+  //     return extractSchema(text);
+  //   } catch (error) {
+  //     console.error('Error extracting schema:', error);
+  //     return null;
+  //   }
+  // };
   
   // Функция для форматирования markdown-текста
   const formatMessage = (text: string) => {

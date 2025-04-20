@@ -272,37 +272,37 @@ export const JsonSchema = () => {
   };
 
   // Функция для генерации новой схемы через WebSocket
-  const generateNewSchema = (description: string, integration_type: string = "kafka_consumer") => {
-    if (isConnected) {
-      webSocketService.sendMessage({
-        type: "create_schema",
-        content: "Запрос на создание JSON схемы",
-        data: {
-          description,
-          integration_type
-        }
-      });
-      setStatusMessage('Запрос на генерацию JSON схемы отправлен...');
-    } else {
-      setStatusMessage('WebSocket не подключен. Невозможно отправить запрос.');
-    }
-  };
+  // const generateNewSchema = (description: string, integration_type: string = "kafka_consumer") => {
+  //   if (isConnected) {
+  //     webSocketService.sendMessage({
+  //       type: "create_schema",
+  //       content: "Запрос на создание JSON схемы",
+  //       data: {
+  //         description,
+  //         integration_type
+  //       }
+  //     });
+  //     setStatusMessage('Запрос на генерацию JSON схемы отправлен...');
+  //   } else {
+  //     setStatusMessage('WebSocket не подключен. Невозможно отправить запрос.');
+  //   }
+  // };
 
-  // Функция для обновления существующей схемы через WebSocket
-  const updateSchema = (updateText: string) => {
-    if (isConnected) {
-      webSocketService.sendMessage({
-        type: "update_schema",
-        content: "Запрос на обновление JSON схемы",
-        data: {
-          update_text: updateText
-        }
-      });
-      setStatusMessage('Запрос на обновление JSON схемы отправлен...');
-    } else {
-      setStatusMessage('WebSocket не подключен. Невозможно отправить запрос.');
-    }
-  };
+  // // Функция для обновления существующей схемы через WebSocket
+  // const updateSchema = (updateText: string) => {
+  //   if (isConnected) {
+  //     webSocketService.sendMessage({
+  //       type: "update_schema",
+  //       content: "Запрос на обновление JSON схемы",
+  //       data: {
+  //         update_text: updateText
+  //       }
+  //     });
+  //     setStatusMessage('Запрос на обновление JSON схемы отправлен...');
+  //   } else {
+  //     setStatusMessage('WebSocket не подключен. Невозможно отправить запрос.');
+  //   }
+  // };
 
   return (
     <div className={styles.jsonSchema}>
