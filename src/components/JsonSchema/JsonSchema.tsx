@@ -310,12 +310,12 @@ export const JsonSchema = () => {
         <h2>JSON Schema</h2>
         <div className={styles.statusIndicator} title={statusMessage || ''}>
           {isConnected && <span className={styles.connected}></span>}
-          {schemaUpdated.current && !statusMessage && (
+          {/* {schemaUpdated.current && !statusMessage && (
             <span className={styles.updatedBadge}>Обновлено</span>
-          )}
-          {statusMessage && (
+          )} */}
+          {/* {statusMessage && (
             <span className={styles.statusMessage}>{statusMessage}</span>
-          )}
+          )} */}
         </div>
       </div>
 
