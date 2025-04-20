@@ -1,8 +1,10 @@
 import { useState, FormEvent, useRef, useEffect } from 'react'
 import styles from './ChatInterface.module.scss'
 import apiService from '@/services/api'
-import { ChatMessage as ApiChatMessage, SchemaData } from '@/types/api'
+import { ChatMessage as ApiChatMessage, SchemaData, WebSocketMessage } from '@/types/api'
 import { API_URL, DEFAULT_REQUEST_CONFIG, EVENTS } from '@/constants/api'
+import { extractSchemaFromResponse as extractSchema } from '@/utils/jsonExtractor'
+import webSocketService from '@/services/webSocketService'
 
 interface ChatInterfaceProps {
   chatName?: string;
@@ -17,7 +19,14 @@ export const ChatInterface = ({ chatName = 'МТС Ассистент' }: ChatIn
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isWsConnected, setIsWsConnected] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  // Флаг, указывающий, что мы ожидаем ответ от WebSocket
+  const [waitingForWsResponse, setWaitingForWsResponse] = useState(false);
+  // Храним последнюю схему, если нам нужно её обновить
+  const lastSchemaRef = useRef<any>(null);
+  // Добавим переменную для отслеживания, был ли последний запрос пользователя о Kafka
+  const [lastUserMessageWasKafka, setLastUserMessageWasKafka] = useState(false);
 
   // Функция для прокрутки вниз
   const scrollToBottom = () => {
@@ -29,7 +38,7 @@ export const ChatInterface = ({ chatName = 'МТС Ассистент' }: ChatIn
     scrollToBottom();
   }, [messages]);
 
-  // Проверяем статус API при загрузке
+  // Проверяем статус API при загрузке и подключаемся к WebSocket
   useEffect(() => {
     const checkApiStatus = async () => {
       const isOnline = await apiService.checkStatus();
@@ -38,6 +47,9 @@ export const ChatInterface = ({ chatName = 'МТС Ассистент' }: ChatIn
         setMessages([
           { text: `API сервер доступен и готов к работе (${API_URL})`, isUser: false }
         ]);
+        
+        // Подключаемся к WebSocket после успешной проверки API
+        webSocketService.connect();
       } else {
         setMessages([
           { text: `Ошибка подключения к API серверу. Пожалуйста, убедитесь, что сервер запущен на ${API_URL}`, isUser: false }
@@ -46,11 +58,168 @@ export const ChatInterface = ({ chatName = 'МТС Ассистент' }: ChatIn
     };
     
     checkApiStatus();
+    
+    // Отключаемся от WebSocket при размонтировании компонента
+    return () => {
+      webSocketService.disconnect();
+    };
   }, []);
   
+  // Подключаемся к событиям WebSocket
+  useEffect(() => {
+    // Обработчик для установки соединения
+    const handleConnect = () => {
+      console.log('WebSocket соединение установлено');
+      setIsWsConnected(true);
+      setMessages(prev => [...prev, { text: 'WebSocket соединение установлено', isUser: false }]);
+    };
+
+    // Обработчик для разрыва соединения
+    const handleDisconnect = () => {
+      console.log('WebSocket соединение разорвано');
+      setIsWsConnected(false);
+      setMessages(prev => [...prev, { text: 'WebSocket соединение разорвано', isUser: false }]);
+    };
+
+    // Обработчик ошибок
+    const handleError = (message: WebSocketMessage) => {
+      console.log('Получена ошибка WebSocket:', message);
+      const errorContent = message.content || (message as any).data?.content || 'Неизвестная ошибка';
+      setMessages(prev => [...prev, { text: `Ошибка WebSocket: ${errorContent}`, isUser: false }]);
+      setIsLoading(false);
+      setWaitingForWsResponse(false);
+    };
+
+    // Обработчик для системных сообщений
+    const handleSystem = (message: WebSocketMessage) => {
+      console.log('Получено системное сообщение WebSocket:', message);
+      const systemContent = message.content || (message as any).data?.content || 'Системное сообщение';
+      setMessages(prev => [...prev, { text: systemContent, isUser: false }]);
+    };
+
+    // Обработчик для сгенерированной JSON схемы
+    const handleJsonGenerated = (message: WebSocketMessage) => {
+      console.log('============ ПОЛУЧЕНА СГЕНЕРИРОВАННАЯ JSON СХЕМА ============');
+      console.log('Полное сообщение:', message);
+      console.log('Тип сообщения:', message.type);
+      console.log('Данные схемы:', message.data);
+      console.log('===========================================================');
+      
+      const schemaData = message.data;
+      if (schemaData) {
+        // Прямое обновление данных из WebSocket, минуя экстрактор JSON
+        lastSchemaRef.current = schemaData;
+        
+        // Сохраним схему в localStorage для отладки
+        try {
+          localStorage.setItem('lastGeneratedSchema', JSON.stringify(schemaData));
+          console.log('Схема сохранена в localStorage как lastGeneratedSchema');
+        } catch (e) {
+          console.error('Ошибка при сохранении схемы в localStorage:', e);
+        }
+        
+        // Проверяем, есть ли информация о Kafka в ответе
+        const isKafkaResponse = 
+          typeof schemaData === 'object' && 
+          (
+            JSON.stringify(schemaData).toLowerCase().includes('kafka') ||
+            (message.type === 'json_generated' && lastUserMessageWasKafka)
+          );
+        
+        if (isKafkaResponse) {
+          setMessages(prev => [...prev, { 
+            text: 'Получен ответ от Kafka. Схема доступна на вкладке "Схема"', 
+            isUser: false 
+          }]);
+        } else {
+          // Уведомляем пользователя об успешной генерации схемы
+          setMessages(prev => [...prev, { 
+            text: 'JSON схема успешно сгенерирована и доступна во вкладке "Схема"', 
+            isUser: false 
+          }]);
+        }
+        
+        // Передаем схему в JsonSchema компонент через сервис
+        apiService.updateSchema({
+          explanation: 'JSON схема успешно сгенерирована',
+          schema: schemaData
+        });
+        
+        setIsLoading(false);
+        setWaitingForWsResponse(false);
+      }
+    };
+
+    // Обработчик для обновленной JSON схемы
+    const handleJsonUpdated = (message: WebSocketMessage) => {
+      console.log('============ ПОЛУЧЕНА ОБНОВЛЕННАЯ JSON СХЕМА ============');
+      console.log('Полное сообщение:', message);
+      console.log('Тип сообщения:', message.type);
+      console.log('Данные схемы:', message.data);
+      console.log('==========================================================');
+      
+      const schemaData = message.data;
+      if (schemaData) {
+        lastSchemaRef.current = schemaData;
+        
+        // Сохраним схему в localStorage для отладки
+        try {
+          localStorage.setItem('lastUpdatedSchema', JSON.stringify(schemaData));
+          console.log('Обновленная схема сохранена в localStorage как lastUpdatedSchema');
+        } catch (e) {
+          console.error('Ошибка при сохранении обновленной схемы в localStorage:', e);
+        }
+        
+        // Уведомляем пользователя об успешном обновлении схемы
+        setMessages(prev => [...prev, { 
+          text: 'JSON схема успешно обновлена и доступна во вкладке "Схема"', 
+          isUser: false 
+        }]);
+        
+        // Передаем схему в JsonSchema компонент через сервис
+        apiService.updateSchema({
+          explanation: 'JSON схема успешно обновлена',
+          schema: schemaData
+        });
+        
+        setIsLoading(false);
+        setWaitingForWsResponse(false);
+      }
+    };
+
+    // Обработчик для статуса операции
+    const handleStatus = (message: WebSocketMessage) => {
+      console.log('Получено сообщение о статусе операции:', message);
+      const statusContent = message.content || (message as any).data?.content || 'Статус операции';
+      setMessages(prev => [...prev, { text: statusContent, isUser: false }]);
+    };
+
+    // Подписываемся на события WebSocket
+    webSocketService.on(EVENTS.CONNECT, handleConnect);
+    webSocketService.on(EVENTS.DISCONNECT, handleDisconnect);
+    webSocketService.on(EVENTS.ERROR, handleError);
+    webSocketService.on(EVENTS.SYSTEM, handleSystem);
+    webSocketService.on(EVENTS.JSON_GENERATED, handleJsonGenerated);
+    webSocketService.on(EVENTS.JSON_UPDATED, handleJsonUpdated);
+    webSocketService.on(EVENTS.STATUS, handleStatus);
+    webSocketService.on(EVENTS.PING, handleStatus);
+
+    // Отписываемся от событий при размонтировании компонента
+    return () => {
+      webSocketService.off(EVENTS.CONNECT, handleConnect);
+      webSocketService.off(EVENTS.DISCONNECT, handleDisconnect);
+      webSocketService.off(EVENTS.ERROR, handleError);
+      webSocketService.off(EVENTS.SYSTEM, handleSystem);
+      webSocketService.off(EVENTS.JSON_GENERATED, handleJsonGenerated);
+      webSocketService.off(EVENTS.JSON_UPDATED, handleJsonUpdated);
+      webSocketService.off(EVENTS.STATUS, handleStatus);
+      webSocketService.off(EVENTS.PING, handleStatus);
+    };
+  }, []);
+
   // Обработчик обновления схемы из API
   const handleSchemaUpdate = (data: SchemaData) => {
-    // Ничего не делаем - схема обрабатывается в JsonSchema компоненте
+    // Обработка оповещений от JsonSchema компонента, если необходимо
   };
   
   // Подписываемся на обновления схемы
@@ -72,86 +241,107 @@ export const ChatInterface = ({ chatName = 'МТС Ассистент' }: ChatIn
       setInputValue('');
       setIsLoading(true);
       
-      try {
-        // Создаем список сообщений для API
-        const apiMessages: ApiChatMessage[] = messages
-          .map(msg => ({
-            role: msg.isUser ? 'user' : 'assistant',
-            content: msg.text
-          }));
+      // Анализируем текст сообщения 
+      const messageText = userMessage.text.toLowerCase();
+      
+      // Определяем типы запросов для логирования и выбора правильного формата сообщения
+      const isKafkaRequest = 
+        messageText.includes('kafka') || 
+        messageText.includes('топик') || 
+        messageText.includes('topic') ||
+        messageText.includes('получить сообщения');
+      
+      // Обновляем состояние последнего запроса о Kafka  
+      setLastUserMessageWasKafka(isKafkaRequest);
+      
+      const isSchemaCreationRequest = 
+        messageText.includes('создай') || 
+        messageText.includes('сгенерируй') || 
+        messageText.includes('создать json') ||
+        messageText.includes('создать схему') ||
+        messageText.includes('генерация json');
         
-        // Добавляем новое сообщение пользователя
-        apiMessages.push({
-          role: 'user',
-          content: userMessage.text
-        });
+      const isSchemaUpdateRequest = 
+        messageText.includes('обнови') || 
+        messageText.includes('измени') || 
+        messageText.includes('добавь в json') ||
+        messageText.includes('обновить схему') ||
+        messageText.includes('изменить json') ||
+        (lastSchemaRef.current && (messageText.includes('добавь') || messageText.includes('удали')));
+      
+      // Используем WebSocket для всех запросов, если соединение активно
+      if (isWsConnected) {
+        setWaitingForWsResponse(true);
         
-        // Отправляем запрос к API
-        const response = await apiService.chatCompletion({
-          model: DEFAULT_REQUEST_CONFIG.MODEL,
-          messages: apiMessages,
-          temperature: DEFAULT_REQUEST_CONFIG.TEMPERATURE,
-          max_tokens: DEFAULT_REQUEST_CONFIG.MAX_TOKENS
-        });
+        // Определяем тип сообщения для WebSocket
+        let message;
         
-        if (response.success && response.data) {
-          const aiMessageContent = response.data.choices[0]?.message?.content || 'Нет ответа от сервера';
-          console.log("Получен ответ от API:", aiMessageContent);
-          
-          // Извлекаем JSON из ответа, если он есть
-          const schemaData = extractSchemaFromResponse(aiMessageContent);
-          
-          // Добавляем только текстовое объяснение в чат
-          let explanationText = aiMessageContent;
-          
-          if (schemaData) {
-            console.log("Извлечена схема:", schemaData.schema);
-            explanationText = schemaData.explanation;
-          } else {
-            // Если не удалось извлечь JSON, попробуем удалить код из ответа вручную
-            explanationText = aiMessageContent.replace(/```json[\s\S]*?```/g, '').trim();
-            
-            // Попробуем найти JSON без маркеров кода
-            const jsonMatch = aiMessageContent.match(/(\{[\s\S]*\})/);
-            if (jsonMatch) {
-              try {
-                const jsonText = jsonMatch[1];
-                const schema = JSON.parse(jsonText);
-                
-                // Создаем и отправляем данные схемы вручную
-                apiService.updateSchema({
-                  explanation: explanationText,
-                  schema: schema
-                });
-                
-                console.log("Извлечена схема без маркеров:", schema);
-              } catch (error) {
-                console.error("Ошибка при попытке извлечь JSON без маркеров:", error);
-              }
+        if (isSchemaUpdateRequest && lastSchemaRef.current) {
+          // Запрос на обновление схемы
+          message = {
+            type: EVENTS.UPDATE_SCHEMA,
+            data: {
+              update_text: userMessage.text
             }
-          }
+          };
           
-          // Добавляем ответ системы
-          setMessages(prevMessages => [
-            ...prevMessages, 
-            { text: explanationText, isUser: false }
-          ]);
+          console.log('=========== ОТПРАВКА ЗАПРОСА НА ОБНОВЛЕНИЕ СХЕМЫ ===========');
+          console.log('Сообщение:', message);
+          console.log('JSON:', JSON.stringify(message));
+          console.log('Существующая схема:', lastSchemaRef.current);
+          console.log('===========================================================');
+          
+          setMessages(prev => [...prev, { 
+            text: 'Выполняется обновление JSON схемы...', 
+            isUser: false 
+          }]);
         } else {
-          // Если произошла ошибка
-          setMessages(prevMessages => [
-            ...prevMessages, 
-            { text: `Ошибка: ${response.error || 'Неизвестная ошибка'}`, isUser: false }
-          ]);
+          // Запрос на создание схемы или обычный запрос
+          message = {
+            type: EVENTS.CREATE_SCHEMA,
+            data: {
+              description: userMessage.text,
+              integration_type: isKafkaRequest ? "kafka_consumer" : "rest"
+            }
+          };
+          
+          // Логируем отправляемое сообщение
+          console.log('============ ОТПРАВКА WEBSOCKET ЗАПРОСА ============');
+          console.log('Сообщение:', message);
+          console.log('JSON:', JSON.stringify(message));
+          console.log('Тип запроса:', 
+            isKafkaRequest ? 'Kafka' : 
+            isSchemaCreationRequest ? 'Создание JSON схемы' : 
+            'Обычный запрос'
+          );
+          console.log('===================================================');
+          
+          // Устанавливаем статус для пользователя в зависимости от типа запроса
+          const statusText = isKafkaRequest 
+            ? 'Обрабатываю запрос к Kafka...' 
+            : isSchemaCreationRequest 
+              ? 'Выполняется генерация JSON схемы...' 
+              : 'Обрабатываю ваш запрос...';
+              
+          setMessages(prev => [...prev, { 
+            text: statusText, 
+            isUser: false 
+          }]);
         }
-      } catch (error) {
-        console.error('Error sending message:', error);
         
-        // Добавляем сообщение об ошибке
-        setMessages(prevMessages => [
-          ...prevMessages, 
-          { text: 'Произошла ошибка при отправке сообщения. Проверьте консоль для деталей.', isUser: false }
-        ]);
-      } finally {
+        // Отправляем сообщение через WebSocket
+        webSocketService.sendMessage(message);
+      } else {
+        // Если WebSocket не доступен, сообщаем пользователю
+        setMessages(prev => [...prev, { 
+          text: 'WebSocket соединение не установлено. Попытка переподключения...', 
+          isUser: false 
+        }]);
+        
+        // Пробуем восстановить соединение
+        webSocketService.connect();
+        
+        // Освобождаем интерфейс 
         setIsLoading(false);
       }
     }
@@ -160,11 +350,10 @@ export const ChatInterface = ({ chatName = 'МТС Ассистент' }: ChatIn
   // Импортируем функцию извлечения JSON
   const extractSchemaFromResponse = (text: string): SchemaData | null => {
     try {
-      // Импортируем динамически во избежание циклических зависимостей
-      const { extractSchemaFromResponse } = require('@/utils/jsonExtractor');
-      return extractSchemaFromResponse(text);
+      // Используем импортированную функцию
+      return extractSchema(text);
     } catch (error) {
-      console.error('Error importing jsonExtractor:', error);
+      console.error('Error extracting schema:', error);
       return null;
     }
   };
@@ -190,6 +379,7 @@ export const ChatInterface = ({ chatName = 'МТС Ассистент' }: ChatIn
     <div className={styles.chatInterface}>
       <div className={styles.chatHeader}>
         <h2>{chatName}</h2>
+        {isWsConnected && <span className={styles.wsIndicator} title="WebSocket подключен"></span>}
       </div>
       
       <div className={styles.messagesContainer}>

@@ -38,8 +38,49 @@ export interface SchemaData {
  */
 export interface WebSocketMessage {
   type: string;
-  content: any;
+  content?: any;
   data?: any;
+}
+
+/**
+ * Сообщение WebSocket в формате test.py
+ */
+export interface TestPyWebSocketMessage {
+  type: string;
+  data: any;
+}
+
+/**
+ * Ответ WebSocket с JSON схемой
+ */
+export interface JsonSchemaResponse extends WebSocketMessage {
+  type: 'json_generated' | 'json_updated';
+  content: string;
+  data: any; // JSON схема
+}
+
+/**
+ * Запрос на создание схемы
+ */
+export interface CreateSchemaRequest extends WebSocketMessage {
+  type: 'create_schema';
+  content: string;
+  data: {
+    description: string;
+    integration_type: string;
+    additional_info?: any;
+  };
+}
+
+/**
+ * Запрос на обновление схемы
+ */
+export interface UpdateSchemaRequest extends WebSocketMessage {
+  type: 'update_schema';
+  content: string;
+  data: {
+    update_text: string;
+  };
 }
 
 /**
