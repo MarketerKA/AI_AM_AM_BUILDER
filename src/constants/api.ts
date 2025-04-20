@@ -1,5 +1,5 @@
 // API URL для разных окружений
-export const API_URL = 'http://localhost:8000';
+export const API_URL = 'http://45.12.228.158:8000';
 
 // Эндпоинты API
 export const API_ENDPOINTS = {
@@ -8,7 +8,7 @@ export const API_ENDPOINTS = {
   CHAT_COMPLETIONS: '/api/chat/completions',
   COMPLETIONS: '/api/completions',
   EMBEDDINGS: '/api/embeddings',
-  WEBSOCKET: 'ws://localhost:8000/ws/json-schema-generator'
+  WEBSOCKET: 'ws://45.12.228.158:8000/ws/json-schema-generator'
 };
 
 // Настройки запросов по умолчанию
