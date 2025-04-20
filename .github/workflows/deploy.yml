@@ -32,6 +32,7 @@ jobs:
         uses: actions/configure-pages@v4
         with:
           enablement: true
+          token: ${{ secrets.PAGES_TOKEN }}
       - name: Install dependencies
         run: npm ci
       - name: Build
@@ -57,4 +58,6 @@ jobs:
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v4 
+        uses: actions/deploy-pages@v4
+        with:
+          token: ${{ secrets.PAGES_TOKEN }} 
