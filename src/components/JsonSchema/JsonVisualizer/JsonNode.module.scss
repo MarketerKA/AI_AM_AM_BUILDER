@@ -1,0 +1,77 @@
+@import '../../../styles/variables.scss';
+
+.node {
+    padding: 10px;
+    border-radius: 8px;
+    background: white;
+    border: 2px solid $color-gray-light;
+    min-width: 200px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: all 0.2s ease;
+
+    &:hover {
+        box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+        border-color: $color-red-primary;
+    }
+}
+
+.header {
+    text-align: center;
+    font-weight: 600;
+    color: $color-red-primary;
+    padding-bottom: 8px;
+    margin-bottom: 8px;
+    border-bottom: 1px solid $color-gray-light;
+    font-size: 14px;
+}
+
+.content {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.property {
+    display: flex;
+    align-items: top;
+    padding: 4px;
+    border-radius: 4px;
+    font-size: 12px;
+    cursor: pointer;
+
+    &:hover {
+        background-color: rgba($color-gray-light, 0.5);
+    }
+}
+
+.propertyKey {
+    color: $color-gray-dark;
+    font-weight: 500;
+    margin-right: 8px;
+    user-select: none;
+}
+
+.propertyValue {
+    color: #2ecc71;
+    font-family: 'Consolas', monospace;
+}
+
+
+
+.editTextarea {
+    justify-content: start;
+    height: 50px;
+    width: 100%;
+    padding: 2px 4px;
+    margin-right: 10px;
+    border: 1px solid $color-red-primary;
+    border-radius: 3px;
+    font-size: 12px;
+    font-family: 'Consolas', monospace;
+    outline: none;
+    resize: none;
+
+    &:focus {
+        box-shadow: 0 0 0 2px rgba($color-red-primary, 0.2);
+    }
+}

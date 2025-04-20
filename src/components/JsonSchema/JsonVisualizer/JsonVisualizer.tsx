@@ -1,4 +1,5 @@
-import { useMemo } from 'react';
+import { useMemo, useCallback } from 'react';
+import dagre from 'dagre';
 import { 
   ReactFlow, 
   Node, 
@@ -7,124 +8,173 @@ import {
   Background,
   Controls,
 } from '@xyflow/react';
+import { JsonNode } from './JsonNode';
 import '@xyflow/react/dist/style.css';
 import styles from './JsonVisualizer.module.scss';
 
 interface JsonVisualizerProps {
   data: any;
+  onChange?: (newData: any) => void;
 }
 
-const createNodesAndEdges = (obj: any, parentId?: string, x = 0, y = 0, level = 0): { nodes: Node[], edges: Edge[], width: number } => {
-    const nodes: Node[] = [];
-    const edges: Edge[] = [];
-    const baseSpacing = 50; // Базовый отступ между узлами
-    const ySpacing = 250; // Вертикальный отступ между уровнями
-  
-    if (typeof obj === 'object' && obj !== null) {
-      // Создаем массив объектных свойств
-      const objectProps = Object.entries(obj).filter(([_, value]) => typeof value === 'object' && value !== null);
-      
-      // Сначала получаем ширину всех дочерних элементов
-      const childrenLayouts = objectProps.map(([key, value]) => 
-        createNodesAndEdges(value, key, 0, 0, level + 1)
+// Add helper function for creating unique IDs
+const createNodeId = (path: string[]): string => {
+  return path.length > 0 ? path.join('-') : 'root';
+};
+
+const createNodesAndEdges = (
+  obj: any, 
+  parentPath: string[] = [],
+  onPropertyChange?: (path: string[], oldKey: string, newKey: string, value: any) => void,
+): { nodes: Node[], edges: Edge[] } => {
+  const nodes: Node[] = [];
+  const edges: Edge[] = [];
+
+  if (typeof obj !== 'object' || obj === null) {
+    return { nodes, edges };
+  }
+
+  // Create current node
+  const currentId = createNodeId(parentPath);
+  const primitiveProps = Object.entries(obj)
+    .filter(([_, value]) => typeof value !== 'object' || value === null)
+    .map(([key, value]) => ({key, value}));
+
+  nodes.push({
+    id: currentId,
+    type: 'jsonNode',
+    position: { x: 0, y: 0 }, // Will be positioned by dagre
+    data: { 
+      label: parentPath[parentPath.length - 1] || 'root',
+      properties: primitiveProps,
+      onPropertyChange: (oldKey: string, newKey: string, newValue: any) => {
+        onPropertyChange?.(parentPath, oldKey, newKey, newValue);
+      }
+    },
+    style: {
+      width: 250,
+      border: '1px solid #ccc',
+      borderRadius: '8px',
+      background: '#fff',
+    },
+  });
+
+  // Process child nodes
+  Object.entries(obj)
+    .filter(([_, value]) => typeof value === 'object' && value !== null)
+    .forEach(([key, value]) => {
+      const childPath = [...parentPath, key];
+      const { nodes: childNodes, edges: childEdges } = createNodesAndEdges(
+        value,
+        childPath,
+        onPropertyChange
       );
-      
-      // Вычисляем необходимую ширину для текущего уровня
-      const totalChildrenWidth = childrenLayouts.reduce((sum, layout) => sum + layout.width, 0);
-      const spacingMultiplier = Math.max(1, Math.min(3, Math.floor(totalChildrenWidth / 1000)));
-      const adjustedSpacing = baseSpacing * spacingMultiplier;
-      const currentLevelWidth = Math.max(
-        200, // Минимальная ширина узла
-        totalChildrenWidth + (childrenLayouts.length - 1) * adjustedSpacing
-      );
-  
-      // Создаем текущий узел
-      const primitiveProps = Object.entries(obj)
-        .filter(([_, value]) => typeof value !== 'object' || value === null)
-        .map(([key, value]) => ({key, value}));
-  
-      const currentId = parentId ? `${parentId}-${Object.keys(obj).length}` : '1';
-  
-      nodes.push({
-        id: currentId,
-        position: { x, y },
-        data: { 
-          label: (
-            <div style={{ padding: '8px' }}>
-              <div style={{ fontWeight: 'bold', marginBottom: '4px' }}>
-                {parentId || 'root'}
-              </div>
-              {primitiveProps.length > 0 && (
-                <div style={{ fontSize: '12px', textAlign: 'left' }}>
-                  {primitiveProps.map(({key, value}, i) => (
-                    <div key={i}>
-                      <span style={{ fontWeight: 'bold' }}>{key}: </span>
-                      <span>{String(value)}</span>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          )
-        },
-        style: {
-          minWidth: '200px',
-          border: '1px solid #ccc',
-          borderRadius: '8px',
-          background: '#fff',
-        },
-      });
-  
-      // Распределяем дочерние элементы
-      let startX = x - currentLevelWidth / 2;
-      childrenLayouts.forEach((layout) => {
-        const childWidth = layout.width;
-        const childX = startX + childWidth / 2;
-        
-        // Добавляем узлы и ребра дочернего элемента с пересчитанными координатами
-        const shiftedNodes = layout.nodes.map(node => ({
-          ...node,
-          position: {
-            x: node.position.x + childX,
-            y: node.position.y + y + ySpacing
-          }
-        }));
-        
-        nodes.push(...shiftedNodes);
-        edges.push(...layout.edges);
+
+      nodes.push(...childNodes);
+
+      // Create edge from current node to first child
+      if (childNodes.length > 0) {
         edges.push({
-          id: `e${currentId}-${shiftedNodes[0].id}`,
+          id: `e-${currentId}-${createNodeId(childPath)}`,
           source: currentId,
-          target: shiftedNodes[0].id,
-          type: 'step',
+          target: createNodeId(childPath),
+          type: 'smoothstep',
           animated: true,
           style: { 
             stroke: '#dc3545',
             strokeWidth: 2,
-            opacity: 0.8,
           },
         });
-  
-        startX += childWidth + adjustedSpacing;
-      });
-  
-      return { nodes, edges, width: currentLevelWidth };
-    }
-  
-    return { nodes, edges, width: 200 }; // Базовая ширина для листовых узлов
-  };
+      }
 
-export const JsonVisualizer = ({ data }: JsonVisualizerProps) => {
+      edges.push(...childEdges);
+    });
+
+  return { nodes, edges };
+};
+
+const getLayoutedElements = (nodes: Node[], edges: Edge[]) => {
+  const dagreGraph = new dagre.graphlib.Graph();
+  dagreGraph.setDefaultEdgeLabel(() => ({}));
+  
+  // Configure layout
+  dagreGraph.setGraph({
+    rankdir: 'TB',
+    align: 'DL',
+    nodesep: 50,
+    ranksep: 200,
+    edgesep: 80,
+  });
+
+  // Add nodes and edges
+  nodes.forEach(node => {
+    dagreGraph.setNode(node.id, { width: 250, height: 100 });
+  });
+  edges.forEach(edge => {
+    dagreGraph.setEdge(edge.source, edge.target);
+  });
+
+  // Calculate layout
+  dagre.layout(dagreGraph);
+
+  // Get positioned nodes
+  const layoutedNodes = nodes.map(node => {
+    const nodeWithPosition = dagreGraph.node(node.id);
+    return {
+      ...node,
+      position: {
+        x: nodeWithPosition.x - nodeWithPosition.width / 2,
+        y: nodeWithPosition.y - nodeWithPosition.height / 2,
+      }
+    };
+  });
+
+  return { nodes: layoutedNodes, edges };
+};
+
+export const JsonVisualizer = ({ data, onChange }: JsonVisualizerProps) => {
+  const handlePropertyChange = useCallback((path: string[], oldKey: string, newKey: string, value: any) => {
+    if (!onChange) return;
+    
+    const newData = JSON.parse(JSON.stringify(data)); // Deep clone to avoid reference issues
+    let current = newData;
+    let parent = null;
+    
+    // Navigate to the parent of the target object
+    for (let i = 0; i < path.length; i++) {
+      parent = current;
+      current = current[path[i]];
+    }
+    
+    // Handle the change
+    if (parent === null) {
+      // We're at root level
+      if (oldKey !== newKey) {
+        delete newData[oldKey];
+      }
+      newData[newKey] = value;
+    } else {
+      // We're at a nested level
+      if (oldKey !== newKey) {
+        delete current[oldKey];
+      }
+      current[newKey] = value;
+    }
+    
+    onChange(newData);
+  }, [data, onChange]);
+
   const { nodes, edges } = useMemo(() => {
-    const { nodes, edges } = createNodesAndEdges(data);
-    return { nodes, edges };
-  }, [data]);
+    const elements = createNodesAndEdges(data, [], handlePropertyChange);
+    return getLayoutedElements(elements.nodes, elements.edges);
+  }, [data, handlePropertyChange]);
 
   return (
     <div className={styles.visualizerWrapper}>
       <ReactFlow
         nodes={nodes}
         edges={edges}
+        nodeTypes={{ jsonNode: JsonNode }}
         connectionMode={ConnectionMode.Loose}
         defaultViewport={{ x: 0, y: 0, zoom: 0.8 }}
         minZoom={0.2}
@@ -142,4 +192,4 @@ export const JsonVisualizer = ({ data }: JsonVisualizerProps) => {
       </ReactFlow>
     </div>
   );
-}; 
+};

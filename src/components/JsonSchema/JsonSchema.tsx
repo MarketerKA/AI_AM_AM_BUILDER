@@ -22,6 +22,77 @@ const initialSchema = {
   "version": "1.0.0",
   "note": "Отправьте запрос в чате, чтобы получить схему"
 }
+const testSchema = {
+  "id": "uuid",
+  "name": "Аренда самокатов",
+  "description": "Сервис для аренды самокатов в различных локациях",
+  "status": "active",
+  "users": [
+    {
+      "id": "uuid",
+      "name": "Иван Иванов",
+      "email": "ivan.ivanov@example.com",
+      "phone": "+7 901 234 56 78",
+      "address": {
+        "id": "uuid",
+        "street": "Улица Дзержинского",
+        "house": "12",
+        "apartment": "1",
+        "city": "Москва",
+        "country": "Россия"
+      }
+    }
+  ],
+  "samokaty": [
+    {
+      "id": "uuid",
+      "name": "Самокат 1",
+      "description": "Самокат для аренды",
+      "status": "available",
+      "location": {
+        "id": "uuid",
+        "street": "Улица Дзержинского",
+        "house": "12",
+        "apartment": "1",
+        "city": "Москва",
+        "country": "Россия"
+      }
+    },
+    {
+      "id": "uuid",
+      "name": "Самокат 2",
+      "description": "Самокат для аренды",
+      "status": "available",
+      "location": {
+        "id": "uuid",
+        "street": "Улица Дзержинского",
+        "house": "12",
+        "apartment": "2",
+        "city": "Москва",
+        "country": "Россия"
+      }
+    }
+  ],
+  "orders": [
+    {
+      "id": "uuid",
+      "user_id": "uuid",
+      "samokat_id": "uuid",
+      "start_date": "2023-03-01",
+      "end_date": "2023-03-31",
+      "status": "active"
+    }
+  ],
+  "payments": [
+    {
+      "id": "uuid",
+      "order_id": "uuid",
+      "amount": "100.00",
+      "payment_method": "credit_card",
+      "status": "paid"
+    }
+  ]
+};
 
 export const JsonSchema = () => {
   const [activeTab, setActiveTab] = useState<'code' | 'editor' | 'visualizer'>('code')
@@ -151,77 +222,7 @@ export const JsonSchema = () => {
 
   // Функция загрузки тестового примера JSON
   const loadTestExample = () => {
-    const testSchema = {
-      "id": "uuid",
-      "name": "Аренда самокатов",
-      "description": "Сервис для аренды самокатов в различных локациях",
-      "status": "active",
-      "users": [
-        {
-          "id": "uuid",
-          "name": "Иван Иванов",
-          "email": "ivan.ivanov@example.com",
-          "phone": "+7 901 234 56 78",
-          "address": {
-            "id": "uuid",
-            "street": "Улица Дзержинского",
-            "house": "12",
-            "apartment": "1",
-            "city": "Москва",
-            "country": "Россия"
-          }
-        }
-      ],
-      "samokaty": [
-        {
-          "id": "uuid",
-          "name": "Самокат 1",
-          "description": "Самокат для аренды",
-          "status": "available",
-          "location": {
-            "id": "uuid",
-            "street": "Улица Дзержинского",
-            "house": "12",
-            "apartment": "1",
-            "city": "Москва",
-            "country": "Россия"
-          }
-        },
-        {
-          "id": "uuid",
-          "name": "Самокат 2",
-          "description": "Самокат для аренды",
-          "status": "available",
-          "location": {
-            "id": "uuid",
-            "street": "Улица Дзержинского",
-            "house": "12",
-            "apartment": "2",
-            "city": "Москва",
-            "country": "Россия"
-          }
-        }
-      ],
-      "orders": [
-        {
-          "id": "uuid",
-          "user_id": "uuid",
-          "samokat_id": "uuid",
-          "start_date": "2023-03-01",
-          "end_date": "2023-03-31",
-          "status": "active"
-        }
-      ],
-      "payments": [
-        {
-          "id": "uuid",
-          "order_id": "uuid",
-          "amount": "100.00",
-          "payment_method": "credit_card",
-          "status": "paid"
-        }
-      ]
-    };
+    
     
     setSchema(testSchema);
     schemaUpdated.current = true;
@@ -329,7 +330,22 @@ export const JsonSchema = () => {
 
         {activeTab === 'visualizer' && (
           <div className={styles.visualizerTab}>
-            <JsonVisualizer data={schema} />
+            <JsonVisualizer 
+              data={schema} 
+              onChange={(newData) => {
+                setSchema(newData);
+                schemaUpdated.current = true;
+                
+                // If connected, send updates through websocket
+                // if (isConnected) {
+                //   webSocketService.sendMessage({
+                //     type: EVENTS.SCHEMA_UPDATE,
+                //     content: 'Schema update from visualizer',
+                //     data: { schema: newData }
+                //   });
+                // }
+              }} 
+            />
           </div>
         )}
       </div>
