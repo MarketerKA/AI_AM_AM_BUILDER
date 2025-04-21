@@ -23,7 +23,7 @@ npm run dev
 npm run build
 ```
 
-## Деплой на GitHub Pages y
+## Деплой на GitHub Pages
 
 ### Автоматический деплой
 При пуше в ветку `frontend` сайт автоматически публикуется через GitHub Actions.
