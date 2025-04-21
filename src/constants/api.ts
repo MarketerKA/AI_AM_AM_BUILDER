@@ -1,6 +1,6 @@
 // Определяем, какие протоколы использовать
 const isProduction = window.location.protocol === 'https:';
-const httpProtocol = isProduction ? 'https' : 'http';
+// const httpProtocol = isProduction ? 'https' : 'http';
 const wsProtocol = isProduction ? 'wss' : 'ws';
 const API_HOST = '45.12.228.158:8000';
 
