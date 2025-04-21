@@ -1,5 +1,11 @@
+// Определяем, какие протоколы использовать
+const isProduction = window.location.protocol === 'https:';
+const httpProtocol = isProduction ? 'https' : 'http';
+const wsProtocol = isProduction ? 'wss' : 'ws';
+const API_HOST = '45.12.228.158:8000';
+
 // API URL для разных окружений
-export const API_URL = 'http://45.12.228.158:8000';
+export const API_URL = `http://${API_HOST}`;
 
 // Эндпоинты API
 export const API_ENDPOINTS = {
@@ -8,7 +14,7 @@ export const API_ENDPOINTS = {
   CHAT_COMPLETIONS: '/api/chat/completions',
   COMPLETIONS: '/api/completions',
   EMBEDDINGS: '/api/embeddings',
-  WEBSOCKET: 'ws://45.12.228.158:8000/ws/json-schema-generator'
+  WEBSOCKET: `${wsProtocol}://${API_HOST}/ws/json-schema-generator`
 };
 
 // Настройки запросов по умолчанию

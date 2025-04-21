@@ -6,6 +6,9 @@
   background-color: var(--bg-primary);
   color: var(--text-primary);
   transition: all 0.3s ease;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 
   :global {
     input, textarea, select {
@@ -28,4 +31,35 @@
   }
 
   
+}
+
+.errorBanner {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  background-color: #ff5252;
+  color: white;
+  padding: 10px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 9999;
+  
+  p {
+    margin: 0;
+  }
+  
+  button {
+    background: transparent;
+    border: 1px solid white;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    
+    &:hover {
+      background-color: rgba(255, 255, 255, 0.2);
+    }
+  }
 }
