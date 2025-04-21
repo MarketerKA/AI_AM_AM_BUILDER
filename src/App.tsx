@@ -5,6 +5,7 @@ import apiService from './services/api'
 import webSocketService from './services/webSocketService'
 import { API_URL } from './constants/api'
 import { ThemeProvider } from '@/contexts/ThemeContext';
+import 'react18-json-view/src/style.css'
 
 function App() {
   // Проверяем доступность API и WebSocket при загрузке приложения

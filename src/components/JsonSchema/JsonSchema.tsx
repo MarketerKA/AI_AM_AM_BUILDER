@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect, useRef } from 'react'
 import styles from './JsonSchema.module.scss'
-import ReactJson from 'react-json-view'
+import ReactJson from 'react18-json-view'
 import CodeMirror from '@uiw/react-codemirror'
 import { json } from '@codemirror/lang-json'
 import { EditorView } from '@codemirror/view'
@@ -368,13 +368,9 @@ export const JsonSchema = () => {
               <ReactJson
                 src={schema}
                 style={{ backgroundColor: 'transparent' }}
-                displayDataTypes={false}
                 enableClipboard={true}
-                name={false}
                 collapsed={false}
-                displayObjectSize={false}
-                indentWidth={2}
-                theme="rjv-default"
+                theme="atom"
               />
             </div>
           </div>
